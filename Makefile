@@ -24,7 +24,7 @@ install-dev:
 	fi
 	$(VENV_ROOT)/bin/pip install --upgrade pip
 	$(VENV_ROOT)/bin/pip install -r requirements-dev.txt
-	@echo -e "$(GREEN)[+] Development environment is ready. Activate it with: source $(VENV_BIN)/activate"
+	@echo "$(GREEN)[+] Development environment is ready. Activate it with: source $(VENV_BIN)/activate"
 
 install-pre-commit:
 	$(VENV_BIN)/pre-commit install
@@ -54,37 +54,37 @@ pip-audit:
 	$(VENV_BIN)/pip-audit
 
 test-unit:
-	@echo -e "$(BLUE)Running unit tests...$(NC)"
+	@echo "$(BLUE)Running unit tests...$(NC)"
 	$(VENV_BIN)/pytest test/unit -v --tb=short
 
 test-integration:
-	@echo -e "$(BLUE)Running integration tests...$(NC)"
+	@echo "$(BLUE)Running integration tests...$(NC)"
 	$(VENV_BIN)/pytest test/integration -v --tb=short
 
 test-e2e:
-	@echo -e "$(BLUE)Running end-to-end tests...$(NC)"
+	@echo "$(BLUE)Running end-to-end tests...$(NC)"
 	$(VENV_BIN)/pytest test/e2e -v --tb=short
 
 test-fast: test-unit
-	@echo -e "$(GREEN)Fast tests completed!$(NC)"
+	@echo "$(GREEN)Fast tests completed!$(NC)"
 
 test: test-unit test-integration test-e2e
-	@echo -e "$(GREEN)All tests completed!$(NC)"
+	@echo "$(GREEN)All tests completed!$(NC)"
 
 test-coverage:
-	@echo -e "$(BLUE)Running tests with coverage...$(NC)"
+	@echo "$(BLUE)Running tests with coverage...$(NC)"
 	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest
 
 test-coverage-unit:
-	@echo -e "$(BLUE)Running unit tests with coverage...$(NC)"
+	@echo "$(BLUE)Running unit tests with coverage...$(NC)"
 	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/unit
 
 test-coverage-integration:
-	@echo -e "$(BLUE)Running integration tests with coverage...$(NC)"
+	@echo "$(BLUE)Running integration tests with coverage...$(NC)"
 	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/integration
 
 test-coverage-e2e:
-	@echo -e "$(BLUE)Running e2e tests with coverage...$(NC)"
+	@echo "$(BLUE)Running e2e tests with coverage...$(NC)"
 	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/e2e
 
 coverage-report: coverage-html coverage-xml
@@ -101,17 +101,17 @@ coverage-check:
 coverage-clean:
 	rm -rf reports/coverage
 
+test-all: lint security test-coverage coverage-check
+	@echo "$(GREEN)All checks and tests passed!$(NC)"
+
+test-ci: test-unit test-integration
+	@echo "$(GREEN)CI tests completed!$(NC)"
+
 clean:
 	rm -rf __pycache__ .pytest_cache .mypy_cache .coverage .coverage.* .tox .eggs *.egg-info build dist .venv reports/ logs/
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 
-# Comprehensive testing workflows
-test-all: lint security test-coverage coverage-check
-	@echo -e "$(GREEN)All checks and tests passed!$(NC)"
-
-test-ci: test-unit test-integration
-	@echo -e "$(GREEN)CI tests completed!$(NC)"
 
 help:
 	@echo "$(BLUE)Available commands:$(NC)"

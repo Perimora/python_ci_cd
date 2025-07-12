@@ -1,6 +1,7 @@
 """End-to-end tests for the application."""
 
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -37,7 +38,7 @@ class TestAppE2E:
     def test_pytest_runs_successfully(self) -> None:
         """Test that pytest runs all tests successfully."""
         result = subprocess.run(
-            ["python3", "-m", "pytest", "test/unit", "-v"],
+            [sys.executable, "-m", "pytest", "test/unit", "-v"],
             capture_output=True,
             text=True,
             cwd=Path(__file__).parent.parent.parent,
