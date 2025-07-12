@@ -12,7 +12,7 @@ endif
 VENV_ROOT=.venv
 VENV_BIN=$(VENV_ROOT)/bin
 
-.PHONY: install-dev install-pre-commit pre-commit lint format security bandit safety pip-audit test-fast test coverage-report coverage-html coverage-xml coverage-check coverage-clean clean
+.PHONY: help install-dev install-pre-commit pre-commit lint format security bandit safety pip-audit test-unit test-integration test-e2e test-fast test test-coverage test-coverage-unit test-coverage-integration test-coverage-e2e coverage-report coverage-html coverage-xml coverage-check coverage-clean test-all test-ci clean help
 
 install-dev:
 	sudo apt update && sudo apt install -y python3 python3-venv python3-pip
@@ -53,11 +53,39 @@ safety:
 pip-audit:
 	$(VENV_BIN)/pip-audit
 
-test-fast:
-	$(VENV_BIN)/pytest test
+test-unit:
+	@echo -e "$(BLUE)Running unit tests...$(NC)"
+	$(VENV_BIN)/pytest test/unit -v --tb=short
 
-test:
+test-integration:
+	@echo -e "$(BLUE)Running integration tests...$(NC)"
+	$(VENV_BIN)/pytest test/integration -v --tb=short
+
+test-e2e:
+	@echo -e "$(BLUE)Running end-to-end tests...$(NC)"
+	$(VENV_BIN)/pytest test/e2e -v --tb=short
+
+test-fast: test-unit
+	@echo -e "$(GREEN)Fast tests completed!$(NC)"
+
+test: test-unit test-integration test-e2e
+	@echo -e "$(GREEN)All tests completed!$(NC)"
+
+test-coverage:
+	@echo -e "$(BLUE)Running tests with coverage...$(NC)"
 	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest
+
+test-coverage-unit:
+	@echo -e "$(BLUE)Running unit tests with coverage...$(NC)"
+	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/unit
+
+test-coverage-integration:
+	@echo -e "$(BLUE)Running integration tests with coverage...$(NC)"
+	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/integration
+
+test-coverage-e2e:
+	@echo -e "$(BLUE)Running e2e tests with coverage...$(NC)"
+	$(VENV_BIN)/coverage run --rcfile=config/.coveragerc -m pytest test/e2e
 
 coverage-report: coverage-html coverage-xml
 
@@ -74,4 +102,46 @@ coverage-clean:
 	rm -rf reports/coverage
 
 clean:
-	rm -rf __pycache__ .pytest_cache .mypy_cache .coverage .coverage.* .tox .eggs *.egg-info build dist .venv reports/
+	rm -rf __pycache__ .pytest_cache .mypy_cache .coverage .coverage.* .tox .eggs *.egg-info build dist .venv reports/ logs/
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+
+# Comprehensive testing workflows
+test-all: lint security test-coverage coverage-check
+	@echo -e "$(GREEN)All checks and tests passed!$(NC)"
+
+test-ci: test-unit test-integration
+	@echo -e "$(GREEN)CI tests completed!$(NC)"
+
+help:
+	@echo "$(BLUE)Available commands:$(NC)"
+	@echo "$(GREEN)Development:$(NC)"
+	@echo "  install-dev       - Install development dependencies"
+	@echo "  install-pre-commit - Install pre-commit hooks"
+	@echo "  pre-commit        - Run pre-commit hooks"
+	@echo ""
+	@echo "$(GREEN)Code Quality:$(NC)"
+	@echo "  lint              - Run all linting tools (black, flake8, isort, mypy)"
+	@echo "  format            - Format code with black and isort"
+	@echo "  security          - Run security scans (bandit, safety, pip-audit)"
+	@echo ""
+	@echo "$(GREEN)Testing:$(NC)"
+	@echo "  test-unit         - Run unit tests only"
+	@echo "  test-integration  - Run integration tests only"
+	@echo "  test-e2e          - Run end-to-end tests only"
+	@echo "  test-fast         - Run unit tests (alias for test-unit)"
+	@echo "  test              - Run all tests (unit, integration, e2e)"
+	@echo "  test-coverage     - Run all tests with coverage"
+	@echo "  test-all          - Run lint, security, and coverage tests"
+	@echo "  test-ci           - Run unit and integration tests (for CI)"
+	@echo ""
+	@echo "$(GREEN)Coverage:$(NC)"
+	@echo "  coverage-report   - Generate coverage reports (HTML and XML)"
+	@echo "  coverage-html     - Generate HTML coverage report"
+	@echo "  coverage-xml      - Generate XML coverage report"
+	@echo "  coverage-check    - Check coverage threshold (80%)"
+	@echo "  coverage-clean    - Clean coverage files"
+	@echo ""
+	@echo "$(GREEN)Maintenance:$(NC)"
+	@echo "  clean             - Clean temporary files and caches"
+	@echo "  help              - Show this help message"
