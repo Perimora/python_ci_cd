@@ -4,10 +4,15 @@ YELLOW=\033[1;33m
 BLUE=\033[0;34m
 NC=\033[0m 
 
+ifneq (,$(wildcard config/.env))
+    include config/.env
+    export
+endif
+
 VENV_ROOT=.venv
 VENV_BIN=$(VENV_ROOT)/bin
 
-.PHONY: install-dev install-pre-commit pre-commit lint format security test-fast test coverage-report coverage-html coverage-xml coverage-check coverage-clean clean
+.PHONY: install-dev install-pre-commit pre-commit lint format security bandit safety pip-audit test-fast test coverage-report coverage-html coverage-xml coverage-check coverage-clean clean
 
 install-dev:
 	sudo apt update && sudo apt install -y python3 python3-venv python3-pip
@@ -37,9 +42,15 @@ format:
 	$(VENV_BIN)/black --config config/pyproject.toml .
 	$(VENV_BIN)/isort --settings-path config/pyproject.toml src test
 
-security:
+security: bandit safety pip-audit
+
+bandit:
 	$(VENV_BIN)/bandit -r src -x test -c config/bandit.yaml
-	$(VENV_BIN)/safety check --full-report --file=requirements-dev.txt
+
+safety:
+	SAFETY_API_KEY=$(SAFETY_API_KEY) $(VENV_BIN)/safety scan --full-report --file=requirements-dev.txt
+
+pip-audit:
 	$(VENV_BIN)/pip-audit
 
 test-fast:

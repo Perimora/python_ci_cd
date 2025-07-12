@@ -119,3 +119,6 @@ dmypy.json
 
 #Pycharm IDE
 .idea
+
+# safety ini    
+.safety-project.ini

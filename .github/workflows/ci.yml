@@ -48,6 +48,8 @@ jobs:
         run: make install-dev
       - name: Run security check
         run: make security
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
   test:
     needs: security
     runs-on: ubuntu-latest
