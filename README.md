@@ -13,6 +13,14 @@ A modern Python project template with robust CI/CD, code quality, and security t
 
 ## Quickstart
 
+### 0. Add your SafetyCLI API key
+Since SafetyCLI now demands an existing API key please create a `.env` file in `config/`:
+
+```bash
+echo "SAFETY_API_KEY=$YOUR_API_KEY" > config/.env
+```
+> Note: If you don't add your API key the security checks and therefore also the pre-commit checks will fail. 
+
 ### 1. Clone and Install
 ```bash
 make install-dev
